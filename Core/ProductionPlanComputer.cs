@@ -145,7 +145,7 @@ namespace powerplant.Core
             // STEP 1
             // Implementation in case we want to distribute evenly between windmill powerplants (in order to limit noise)
             // It's only useful if green electricity is enough, else we will just run them at full power in step 2 because they are the most efficient
-            // If we want to start as few powerplants as we can, just remove that block of code and comment out the .Where() below the block
+            // If we want to start as few powerplants as we can, just remove that block of code and set the loop index to begin to 0 below
             //  to make a list of all powerplants. (instead of all non-green-energy powerplants).
             if(wanted <= greenElec)
             {
@@ -179,8 +179,6 @@ namespace powerplant.Core
             // STEP 2
             // Populate the "efficiencies" list so we can have a sorted-by-efficiency list of powerplants.
             // We then try to set the most efficient to their maximum and lower the use of the less efficient ones.
-            // (we know they are the most efficient AND not sufficient, so no need to check anything to add them, so we skip all the checks
-            //  we have to do with the other powerplants)
             r.Powerplants.ToList().ForEach(p => efficiencies.Add(new PowerplantEfficiency(p, r.fuels)));
             efficiencies.Sort();
 
@@ -188,12 +186,11 @@ namespace powerplant.Core
             // We skip them by starting the loop at their number
             var greenPowerplantCount = r.Powerplants.Count(powerplant => powerplant.IsGreenEnergy());
 
-
+            // (we know green powerplants are the most efficient AND not sufficient, so no need to check anything to add them, we skip all the checks
+            //  we have to do with the other powerplants)
+            // This is the loop to start to 0 if we dont want to have that specific noise-reduction idea above
             for (var i = greenPowerplantCount; i != efficiencies.Count(); ++i)
             {
-                // Ignore green energy powerplants, since they have already been manually added. They should all be at the beginning tho.
-                if (efficiencies[i].p.IsGreenEnergy()) continue;
-
                 var eff = efficiencies[i];
 
                 // If we still have energy missing
